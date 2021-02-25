@@ -1,76 +1,84 @@
+
 pragma solidity >=0.7.0 <0.8.0;
 pragma experimental ABIEncoderV2;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 /**
  * @title Storage
  * @dev Store & retrieve value in a variable
  */
-contract AssetBorrow {
+contract AssetBorrow is Ownable {
+    
+    using SafeMath for uint256;
+    
+    mapping(address => bool) public admin;
+    mapping(address => bool) public lenders;
     
     struct Asset {
         string name;
+        bool isAvailable;
+        uint256 storeNum;
+        uint256 price;
+    }
+    
+    enum addressTypes {admin, lender, borrower}
+    
+    /** @dev verifies the msg.sender is an admin */
+    modifier onlyAdmin() {
+        require(admin[msg.sender], "Sorry, you are not admin!");
+        _;
+    }
+    
+    modifier onlyLender() {
+        require(lenders[msg.sender], "Sorry, you are not lender!");
+        _;
+    }
+    
+    modifier onlyBorrower(){
+        require(!lenders[msg.sender], "Sorry, you are not allowed to borrow asset!");
+        require(!admin[msg.sender], "Sorry, you are not allowed to borrow asset!");
+        _;
+    }
+    constructor() public {
+        admin[msg.sender] = true;
+    }
+
+    /**-----------------------------------------------------------------------
+        ------------------------ Admin Functions ----------------------
+       -----------------------------------------------------------------------*/
+
+    /** @dev admin allowed to add a new lender
+     * @param _newLender new lender addrress
+     */    
+    function addLender(address _newLender) public onlyAdmin(){
+        require(lenders[_newLender] == false, "lender already exists!");
+        lender[_newLender] = true;
+        
+    }
+    
+    function isAdmin(address _address) public view returns(bool) {
+        return admin[_address];
+    }
+    /** @dev returns the type of address (admin, lender, or borrower) */    
+    function addressType() public view returns(addressTypes) {
+        if(msg.sendr == super.owner()) return addressTypes.admin;
+        if(lender[msg.sender]) return addressTypes.lender;
+        else return addressTypes.borrower;
     }
 
 
-    /////////////////////////////////////////////////////////Admin
-    function BorrowerList() public view returns (uint256){
-    }
-    
-    function LenderList() public view returns (uint256){
-    }
-    
-    function ApproveBorrower() public view returns (uint256){
-    }
-    
-    function ApproveLender() public view returns (uint256){
-    }
 
-    function ApproveLease() public view returns (uint256){
-    }    
-    /////////////////////////////////////////////////////////Lender
-    function RegisterAsLender() public view returns (uint256){
-    }
+    /**-----------------------------------------------------------------------
+        ------------------------ Lender Functions ----------------------
+       -----------------------------------------------------------------------*/
+
+
+    /**-----------------------------------------------------------------------
+        ------------------------ Borrower Functions ----------------------
+       -----------------------------------------------------------------------*/
+
+
     
-    function AddAsset() public view returns (uint256){
-    }
-    
-    function AssetList(address owner) public view returns (Asset[8] memory){
-    }
-    function AssetRequestList() public view returns (Asset[8] memory){
-    }
-    
-    function ApproveRequest() public view returns (uint256){
-    }
-    
-    function RejectRequest() public view returns (uint256){
-    }
-  
-    function AssetDamaged() public view returns (uint256){
-    }  
-    /////////////////////////////////////////////////////////Lender    
-    function RegisterAsBorrower() public view returns (uint256){
-    }      
-    function AllAssetsList() public view returns (Asset[8] memory){
-    }
-    
-    function RequestAsset() public view returns (uint256)//check Asset Free
-    {
-    }
-    
-    function ApproveAssetReceie() public view returns (uint256){
-    }
-    
-    function ReturnAsset() public view returns (uint256){
-    }    
-    /////////////////////////////////////////////////////////???????    
-    function CalculateRentCosts() public view returns (uint256){
-    }
-   
-    function penalizeBorrower() public view returns (uint256){
-    }
-    
-    function CalculateCosts() public view returns (uint256){
-    }
-    
-    
-}
+}    
